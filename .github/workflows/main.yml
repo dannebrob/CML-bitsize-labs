@@ -1,0 +1,54 @@
+name: Sync lab Markdown files to blog
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "labs/**"
+      - "images/**"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo (Lab repo)
+        uses: actions/checkout@v4
+
+      - name: Checkout blog repo (Repo B)
+        uses: actions/checkout@v4
+        with:
+          repository: dannebrob/dannebrob.github.io
+          token: ${{ secrets.PAT }}
+          path: blog
+
+      # Kopiera bilder från root/images → blog/images
+      - name: Copy images from root images/ to blog/images/
+        run: |
+          mkdir -p blog/images
+          if [ -d images ]; then
+            cp images/* blog/images/ || true
+          fi
+
+      # Kopiera och skriv om MD-filer från labs/ → blog/_posts/
+      - name: Copy and rewrite MD files from labs/ to blog/_posts/
+        run: |
+          mkdir -p blog/_posts
+          for file in labs/*.md; do
+            [ -e "$file" ] || continue
+            filename=$(basename "$file")
+            newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
+
+            # Uppdatera bildlänkar från /images/... (om du använder sådana)
+            sed 's#](/images/#](/images/#g' "$file" > "blog/_posts/$newname"
+          done
+
+      - name: Commit and push changes to blog
+        run: |
+          cd blog
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
+          git push
