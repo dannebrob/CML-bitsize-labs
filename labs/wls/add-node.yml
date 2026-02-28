@@ -1,0 +1,13 @@
+---
+- name: Lägg till node i CML-labb
+  hosts: cml
+  gather_facts: no
+
+  tasks:
+    - name: Kör Python-script som lägger till node
+      ansible.builtin.command: "python3 add_node.py"
+      register: output
+
+    - name: Visa resultat
+      ansible.builtin.debug:
+        msg: "{{ output.stdout }}"

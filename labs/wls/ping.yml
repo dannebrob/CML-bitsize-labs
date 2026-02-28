@@ -1,0 +1,8 @@
+---
+- name: Testa anslutning till CML-host
+  hosts: cml
+  gather_facts: no
+
+  tasks:
+    - name: Pinga hosten via Ansible
+      ansible.builtin.ping:
