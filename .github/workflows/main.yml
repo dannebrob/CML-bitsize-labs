@@ -31,16 +31,17 @@ jobs:
             cp images/* blog/images/ || true
           fi
 
-      # Kopiera och skriv om MD-filer från labs/ → blog/_posts/
+      # Kopiera och skriv om ALLA MD-filer rekursivt från labs/
       - name: Copy and rewrite MD files from labs/ to blog/_posts/
         run: |
           mkdir -p blog/_posts
-          for file in labs/*.md; do
-            [ -e "$file" ] || continue
+
+          # Hitta alla .md-filer i labs/ rekursivt
+          find labs -type f -name "*.md" | while read file; do
             filename=$(basename "$file")
             newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
 
-            # Uppdatera bildlänkar från /images/... (om du använder sådana)
+            # Skriv om bildlänkar om du använder /images/
             sed 's#](/images/#](/images/#g' "$file" > "blog/_posts/$newname"
           done
 
