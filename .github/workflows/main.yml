@@ -36,13 +36,29 @@ jobs:
         run: |
           mkdir -p blog/_posts
 
-          # Hitta alla .md-filer i labs/ rekursivt
           find labs -type f -name "*.md" | while read file; do
             filename=$(basename "$file")
+            dirname=$(basename "$(dirname "$file")")   # undermapp, t.ex. wls
+            cleanname="${filename%.md}"
+
+            # Snygg titel: "WLS – Intro (CML-bitsize-labs)"
+            title="$(echo "$dirname" | tr '-' ' ' | sed 's/.*/\u&/') – $(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
+
+            # Kategori baserat på undermappen, t.ex. ["wls"]
+            category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
+
             newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
 
-            # Skriv om bildlänkar om du använder /images/
-            sed 's#](/images/#](/images/#g' "$file" > "blog/_posts/$newname"
+            {
+              echo "---"
+              echo "title: \"$title\""
+              echo "categories: [\"$category\"]"
+              echo "source_repo: \"${{ github.event.repository.name }}\""
+              echo "source_path: \"$file\""
+              echo "---"
+              echo
+              sed 's#](/images/#](/images/#g' "$file"
+            } > "blog/_posts/$newname"
           done
 
       - name: Commit and push changes to blog
