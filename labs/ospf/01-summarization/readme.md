@@ -1,5 +1,8 @@
+A Cisco Modeling Lab exercise focused on OSPF summarization, where you will learn how to configure and verify OSPF summarization in a network environment. The lab will cover the benefits of summarization, how to implement it on a router, and how to troubleshoot any issues that may arise from its configuration.
+
 # 01- Summarization Lab
-Summar
+You will find all the labs in the Bitsize series on my Github, link to repo: [CML-bitsize-labs](https://github.com/dannebrob/CML-bitsize-labs/tree/main).
+
 
 ## Learning Objectives
 - Understand the concept of OSPF summarization and its benefits in reducing routing table size and improving network efficiency.
@@ -9,6 +12,8 @@ Summar
 
 ## Lab Overview
 (image of the lab topology)[LinkToLabTopology.image]
+
+Learn more about summarization in my Encore notebook on github: [OSPF Summarization - Encor/CCNP Notebook](https://github.com/dannebrob/CCNP-study-notes)
 
 ## Lab Instructions
 1. **Setup**: Clone the lab repository and navigate to the `01-summarization` folder. Review the provided startup configurations for the routers in the lab topology.
@@ -79,11 +84,11 @@ find these facts:
 </details>
 <details> 
   <summary>Q2: What is the subnet mask of the summary route? </summary>
-   A1: 255.255.252.0
+   A2: 255.255.252.0
 </details>
 <details> 
   <summary>Q3: Are the individual loopback interfaces still being advertised, or are they being replaced by the summary route? </summary>
-   A1: The individual loopback interfaces are replaced by the summary route.
+   A3: The individual loopback interfaces are replaced by the summary route.
 </details>
 
 - What is the summary route that R1 is advertising for the loopback interfaces?
@@ -97,10 +102,3 @@ find these facts:
 - [Cisco OSPF Documentation](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
 - [Cisco OSPF Configuration Guide](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
 - [Cisco OSPF Summarization Documentation](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
-
-
-
-<details> 
-  <summary>Q1: What is the best Language in the World? </summary>
-   A1: JavaScript 
-</details>
