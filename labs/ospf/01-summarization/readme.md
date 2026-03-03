@@ -1,12 +1,11 @@
-# 01- Summarization
+# 01- Summarization Lab
+Summar
 
 ## Learning Objectives
 - Understand the concept of OSPF summarization and its benefits in reducing routing table size and improving network efficiency.
 - Learn how to configure OSPF summarization on a router and verify its functionality.
-- Analyze the impact of summarization on OSPF routing and network performance.
 - Gain hands-on experience with OSPF summarization in a lab environment.
 - Develop troubleshooting skills related to OSPF summarization and its effects on network connectivity.
-
 
 ## Lab Overview
 (image of the lab topology)[LinkToLabTopology.image]
