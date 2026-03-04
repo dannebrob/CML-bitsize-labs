@@ -31,23 +31,31 @@ jobs:
             cp images/* blog/images/ || true
           fi
 
-      # Kopiera och skriv om ALLA MD-filer rekursivt från labs/
+      # Kopiera och skriv om MD-filer från labs/ → blog/_posts/
       - name: Copy and rewrite MD files from labs/ to blog/_posts/
         run: |
           mkdir -p blog/_posts
 
           find labs -type f -name "*.md" | while read file; do
             filename=$(basename "$file")
-            dirname=$(basename "$(dirname "$file")")   # undermapp, t.ex. wls
+            dirname=$(basename "$(dirname "$file")")
             cleanname="${filename%.md}"
 
-            # Snygg titel: "WLS – Intro (CML-bitsize-labs)"
+            # Titel
             title="$(echo "$dirname" | tr '-' ' ' | sed 's/.*/\u&/') – $(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
 
-            # Kategori baserat på undermappen, t.ex. ["wls"]
+            # Kategori
             category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
 
-            newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
+            # Leta efter befintlig post baserat på source_path
+            existing=$(grep -Rl "source_path: \"$file\"" blog/_posts/ || true)
+
+            if [ -n "$existing" ]; then
+              echo "Updating existing post: $existing"
+              newname=$(basename "$existing")
+            else
+              newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
+            fi
 
             {
               echo "---"
