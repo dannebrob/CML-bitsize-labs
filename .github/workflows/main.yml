@@ -47,4 +47,34 @@ jobs:
             category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
 
             # --- ENDA ÄNDRINGEN: stabilt filnamn baserat på source_path ---
-            slug=$(echo "$file
+            slug=$(echo "$file" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+            newname="${{ github.event.repository.name }}-${slug}.md"
+
+            if [ -f "blog/_posts/$newname" ]; then
+              echo "Updating existing post: $newname"
+            else
+              echo "Creating new post: $newname"
+            fi
+            # ----------------------------------------------------------------
+
+            {
+              echo "---"
+              echo "title: \"$title\""
+              echo "categories: [\"$category\"]"
+              echo "source_repo: \"${{ github.event.repository.name }}\""
+              echo "source_path: \"$file\""
+              echo "---"
+              echo
+              sed 's#](/images/#](/images/#g' "$file"
+            } > "blog/_posts/$newname"
+          done
+
+      - name: Commit and push changes to blog
+        run: |
+          cd blog
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
+          git push
+
