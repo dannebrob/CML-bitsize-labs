@@ -24,36 +24,39 @@ jobs:
         token: ${{ secrets.PAT }}
         path: blog
 
-    - name: Copy images from root images/ to blog/images/
-      run: |
-        mkdir -p blog/images
-        if [ -d images ]; then
-          cp images/* blog/images/ || true
-        fi
-
-    - name: Copy and rewrite MD files from labs/ to blog/_posts/
-      run: |
-        mkdir -p blog/_posts
-
-        find labs -type f -name "*.md" | while read file; do
-          filename=$(basename "$file")
-          dirname=$(basename "$(dirname "$file")")
-          cleanname="${filename%.md}"
-
-          title="$(echo "$dirname" | tr '-' ' ' | sed 's/.*/\u&/') – $(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
-          category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
-
-          # Leta efter befintlig post baserat på source_path
-          existing=$(grep -Rl "source_path: \"$file\"" blog/_posts/ || true)
-
-          if [ -n "$existing" ]; then
-            echo "Updating existing post: $existing"
-            newname=$(basename "$existing")
-          else
-            # Datum-baserat filnamn (återställt)
-            newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
-            echo "Creating new post: $newname"
+      - name: Copy images from root images/ to blog/images/
+        run: |
+          mkdir -p blog/images
+          if [ -d images ]; then
+            cp images/* blog/images/ || true
           fi
+
+      - name: Copy and rewrite MD files from labs/ to blog/_posts/
+        run: |
+          mkdir -p blog/_posts
+
+          pretty_repo="$(echo "${{ github.event.repository.name }}" | tr '-' ' ' | sed 's/.*/\u&/')"
+
+          find labs -type f -name "*.md" | while read file; do
+            filename=$(basename "$file")
+            dirname=$(basename "$(dirname "$file")")
+            cleanname="${filename%.md}"
+
+            pretty_cleanname="$(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/')"
+            title="$pretty_cleanname ($pretty_repo)"
+
+            category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
+
+            # --- ENDA ÄNDRINGEN: stabilt filnamn baserat på source_path ---
+            slug=$(echo "$file" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+            newname="${{ github.event.repository.name }}-${slug}.md"
+
+            if [ -f "blog/_posts/$newname" ]; then
+              echo "Updating existing post: $newname"
+            else
+              echo "Creating new post: $newname"
+            fi
+            # ----------------------------------------------------------------
 
           {
             echo "---"
@@ -67,11 +70,12 @@ jobs:
           } > "blog/_posts/$newname"
         done
 
-    - name: Commit and push changes to blog
-      run: |
-        cd blog
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git add .
-        git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
-        git push
+      - name: Commit and push changes to blog
+        run: |
+          cd blog
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
+          git push
+
