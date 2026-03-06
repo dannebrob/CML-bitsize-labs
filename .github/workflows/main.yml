@@ -4,25 +4,24 @@ on:
   push:
     branches: [ "main" ]
     paths:
-    - "labs/**"
-    - "images/**"
+      - "labs/**"
+      - "images/**"
   workflow_dispatch:
-
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source repo (Lab repo)
-      uses: actions/checkout@v4
+      - name: Checkout source repo (Lab repo)
+        uses: actions/checkout@v4
 
-    - name: Checkout blog repo (Repo B)
-      uses: actions/checkout@v4
-      with:
-        repository: dannebrob/dannebrob.github.io
-        token: ${{ secrets.PAT }}
-        path: blog
+      - name: Checkout blog repo (Repo B)
+        uses: actions/checkout@v4
+        with:
+          repository: dannebrob/dannebrob.github.io
+          token: ${{ secrets.PAT }}
+          path: blog
 
       - name: Copy images from root images/ to blog/images/
         run: |
@@ -35,40 +34,37 @@ jobs:
         run: |
           mkdir -p blog/_posts
 
-          pretty_repo="$(echo "${{ github.event.repository.name }}" | tr '-' ' ' | sed 's/.*/\u&/')"
-
           find labs -type f -name "*.md" | while read file; do
             filename=$(basename "$file")
             dirname=$(basename "$(dirname "$file")")
             cleanname="${filename%.md}"
 
-            pretty_cleanname="$(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/')"
-            title="$pretty_cleanname ($pretty_repo)"
-
+            title="$(echo "$dirname" | tr '-' ' ' | sed 's/.*/\u&/') – $(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
             category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
 
-            # --- ENDA ÄNDRINGEN: stabilt filnamn baserat på source_path ---
-            slug=$(echo "$file" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
-            newname="${{ github.event.repository.name }}-${slug}.md"
+            # Leta efter befintlig post baserat på source_path
+            existing=$(grep -Rl "source_path: \"$file\"" blog/_posts/ || true)
 
-            if [ -f "blog/_posts/$newname" ]; then
-              echo "Updating existing post: $newname"
+            if [ -n "$existing" ]; then
+              echo "Updating existing post: $existing"
+              newname=$(basename "$existing")
             else
+              # Datum-baserat filnamn (återställt)
+              newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
               echo "Creating new post: $newname"
             fi
-            # ----------------------------------------------------------------
 
-          {
-            echo "---"
-            echo "title: \"$title\""
-            echo "categories: [\"$category\"]"
-            echo "source_repo: \"${{ github.event.repository.name }}\""
-            echo "source_path: \"$file\""
-            echo "---"
-            echo
-            sed 's#](/images/#](/images/#g' "$file"
-          } > "blog/_posts/$newname"
-        done
+            {
+              echo "---"
+              echo "title: \"$title\""
+              echo "categories: [\"$category\"]"
+              echo "source_repo: \"${{ github.event.repository.name }}\""
+              echo "source_path: \"$file\""
+              echo "---"
+              echo
+              sed 's#](/images/#](/images/#g' "$file"
+            } > "blog/_posts/$newname"
+          done
 
       - name: Commit and push changes to blog
         run: |
@@ -78,4 +74,3 @@ jobs:
           git add .
           git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
           git push
-
