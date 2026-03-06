@@ -52,4 +52,32 @@ jobs:
             category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
 
             # Leta efter befintlig post baserat på source_path
-            existing=$(grep -Rl "source_path: \"$file\"" blog
+            existing=$(grep -Rl "source_path: \"$file\"" blog/_posts/ || true)
+
+            if [ -n "$existing" ]; then
+              echo "Updating existing post: $existing"
+              newname=$(basename "$existing")
+            else
+              newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
+            fi
+
+            {
+              echo "---"
+              echo "title: \"$title\""
+              echo "categories: [\"$category\"]"
+              echo "source_repo: \"${{ github.event.repository.name }}\""
+              echo "source_path: \"$file\""
+              echo "---"
+              echo
+              sed 's#](/images/#](/images/#g' "$file"
+            } > "blog/_posts/$newname"
+          done
+
+      - name: Commit and push changes to blog
+        run: |
+          cd blog
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Sync lab MD files and root images" || echo "No changes to commit"
+          git push
