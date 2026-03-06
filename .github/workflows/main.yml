@@ -39,7 +39,10 @@ jobs:
             dirname=$(basename "$(dirname "$file")")
             cleanname="${filename%.md}"
 
-            title="$(echo "$dirname" | tr '-' ' ' | sed 's/.*/\u&/') – $(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
+            # NY TITEL: endast filnamnet, ingen mapp
+            title="$(echo "$cleanname" | tr '-' ' ' | sed 's/.*/\u&/') (CML-bitsize-labs)"
+
+            # Kategori baserat på undermappen (oförändrat)
             category="$(echo "$dirname" | tr '[:upper:]' '[:lower:]')"
 
             # Leta efter befintlig post baserat på source_path
@@ -49,7 +52,7 @@ jobs:
               echo "Updating existing post: $existing"
               newname=$(basename "$existing")
             else
-              # Datum-baserat filnamn (återställt)
+              # Datum-baserat filnamn (oförändrat)
               newname="$(date +%Y-%m-%d)-${{ github.event.repository.name }}-$filename"
               echo "Creating new post: $newname"
             fi
