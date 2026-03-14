@@ -1,0 +1,76 @@
+R1:
+interface Ethernet0/0
+ ip address 10.10.10.1 255.255.255.252
+ description R2 - e0/0 (Area 0)
+ no shutdown
+
+R2:
+interface Ethernet0/0
+ ip address 10.10.10.2 255.255.255.252
+ description R1 - e0/0 (Area 0)
+ no shutdown
+
+interface Ethernet0/1
+ ip address 10.20.20.1 255.255.255.252
+ description R3 - e0/0 (Area 1)
+ no shutdown
+
+interface Ethernet0/2
+ ip address 10.20.20.5 255.255.255.252
+ description R4 - e0/0 (Area 1)
+ no shutdown
+
+R3:
+ interface Ethernet0/0
+ ip address 10.20.20.2 255.255.255.252
+ description R2 - e0/1 (Area 1)
+ no shutdown
+
+interface Ethernet0/1
+ ip address 10.20.20.9 255.255.255.252
+ description R5 - e0/0 (Area 1)
+ no shutdown
+
+interface Ethernet0/2
+ ip address 10.50.50.1 255.255.255.0
+ description HR-LAN (non-OSPF)
+ no shutdown
+
+R4:
+interface Ethernet0/0
+ ip address 10.20.20.6 255.255.255.252
+ description R2 - e0/2 (Area 1)
+ no shutdown
+
+interface Ethernet0/1
+ ip address 10.20.20.13 255.255.255.252
+ description R5 - e0/1 (Area 1)
+ no shutdown
+
+R5: 
+interface Ethernet0/0
+ ip address 10.20.20.10 255.255.255.252
+ description R3 - e0/1 (Area 1)
+ no shutdown
+
+interface Ethernet0/1
+ ip address 10.20.20.14 255.255.255.252
+ description R4 - e0/1 (Area 1)
+ no shutdown
+
+interface Ethernet0/2
+ ip address 10.30.30.1 255.255.255.252
+ description R6 - e0/0 (Area 2)
+ no shutdown
+
+ R6:
+ interface Ethernet0/0
+ ip address 10.30.30.2 255.255.255.252
+ description R5 - e0/2 (Area 2)
+ no shutdown
+
+ interface Ethernet0/1
+ ip address 10.60.60.1 255.255.255.0
+ description IT-LAN (non-OSPF)
+ no shutdown
+

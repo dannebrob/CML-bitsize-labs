@@ -1,0 +1,83 @@
+Notebook for documentation of the changes made.
+
+** R1 - Log - no.1 **
+
+Summary:
+Added backbone-area (0) to R1. 
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.10.10.0 0.0.0.3 area 0
+
+Purpose:
+Making sure the multi-area ospf configuration will work
+
+Inpact:
+- R1 becomes part of OSPF Area 0.
+- Full adjacency will form with R2 once R2 is configured.
+- Area 0 LSDB created on R1.
+
+** R2- Log - no.2 **
+
+Summary:
+Added backbone-area (0) to R2. 
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.10.10.0 0.0.0.3 area 0
+
+Purpose:
+Making sure the multi-area ospf configuration will work
+
+Inpact:
+R2 becomes part of OSPF backbone (Area 0).
+- R2 becomes part of OSPF Area 0.
+- Full adjacency formed with R1.
+- Area 0 LSDB synchronized between R1 and R2.
+- R2 now able to act as ABR once Area 1 is added.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+R3 – Change Log – 2026‑03‑14
+
+Summary:
+Added HR-LAN on e0/2 as a non-OSPF connected network.
+
+INTERFACE CHANGES
+Interface: Ethernet0/2
++ ip address 10.50.50.1/24
++ description HR-LAN (non-OSPF)
++ no shutdown
+
+OSPF CHANGES
+No changes. HR-LAN intentionally excluded from OSPF.
+
+Purpose:
+Provide routed access for HR VLAN/subnet while keeping it isolated from OSPF domain.
+
+Impact:
+- HR-LAN reachable only via R3.
+- No Type 5 LSAs generated.
+- No new OSPF adjacencies.
+- R3 remains non-ASBR.
+
+TODO:
+Evaluate if HR-LAN should be redistributed or added to Area 1.
