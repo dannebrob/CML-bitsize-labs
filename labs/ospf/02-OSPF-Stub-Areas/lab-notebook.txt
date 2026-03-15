@@ -15,7 +15,7 @@ network 10.10.10.0 0.0.0.3 area 0
 Purpose:
 Making sure the multi-area ospf configuration will work
 
-Inpact:
+Impact:
 - R1 becomes part of OSPF Area 0.
 - Full adjacency will form with R2 once R2 is configured.
 - Area 0 LSDB created on R1.
@@ -35,13 +35,78 @@ network 10.10.10.0 0.0.0.3 area 0
 Purpose:
 Making sure the multi-area ospf configuration will work
 
-Inpact:
+Impact:
 R2 becomes part of OSPF backbone (Area 0).
 - R2 becomes part of OSPF Area 0.
 - Full adjacency formed with R1.
 - Area 0 LSDB synchronized between R1 and R2.
 - R2 now able to act as ABR once Area 1 is added.
 
+** R2- Log - no.3 **
+
+Summary
+Added area 1 to R2
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.20.20.0 0.0.0.3 area 1
+network 10.20.20.4 0.0.0.3 area 1
+
+Purpose:
+Ensuring routing between networks
+
+** R3- Log - no.4 **
+
+Summary
+Added area 1 to R3
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.20.20.8 0.0.0.3 area 1
+
+Purpose:
+Ensuring routing between networks
+
+
+** R4- Log - no.5 **
+
+Summary
+Added area 1 to R3
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.20.20.12 0.0.0.3 area 1
+
+Purpose:
+Ensuring routing between networks
+
+** R5- Log - no.6 **
+
+Summary
+Added area 1 to R3
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+network 10.20.20.8 0.0.0.3 area 1
+network 10.20.20.12 0.0.0.3 area 1
+
+Purpose:
+Ensuring routing between networks
+
+TODO
+configure Area 2 to be a totally stubby area
 
 
 
