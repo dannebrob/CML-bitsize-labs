@@ -38,7 +38,7 @@ We have a total of 6 routers in this lab, R1, R2, R3, R4, R5 and R6. R1 and R2 w
 Non of the routers are configured with OSPF, but they have at least ip addresses and subnet masks configured on their interfaces. The interfaces connecting the routers are using p2p links (/30).
 The HR and IT LANs are not configured in any other way, they are just connected to the appropriate routers and are assigned ip addresses and subnet masks.
 
-1. **Configure OSPF Stub Areas**
+1. **Configure OSPF Areas**
 - backbone area (Area 0): R1 and R2
 <br>
 We first need to configure OSPF on R1 and R2, and assign them to Area 0. We will also configure R1 to be the DR for Area 0, and R2 to be the BDR for Area 0.
@@ -51,6 +51,7 @@ network 10.10.10.0 0.0.0.3 area 0
 
 R2:
 router ospf 1
+router-id   1.1.1.1
 network 10.10.10.0 0.0.0.3 area 0
 ```
 
@@ -60,19 +61,23 @@ Open up the CLI for R2, R3, R4 and R5 and enter the following commands:
 ```
 R2:
 router ospf 1
+router-id 2..2.2.2
 network 10.20.20.0 0.0.0.3 area 1
 network 10.20.20.4 0.0.0.3 area 1
 
 R3:
 router ospf 1
+router-id 3.3.3.3
 network 10.20.20.8 0.0.0.3 area 1
 
 R4:
 router ospf 1
+router-id 4.4.4.4
 network 10.20.20.12 0.0.0.3 area 1
 
 R5:
 router ospf 1
+router-id 5.5.5.5
 network 10.20.20.8 0.0.0.3 area 1
 network 10.20.20.12 0.0.0.3 area 1
 
@@ -84,8 +89,10 @@ R5:
 router ospf 1
 network 10.30.30.0 0.0.0.3 area 2
 area 2 stub no-summary
+
 R6:
 router ospf 1
+router-id 6.6.6.6
 network 10.30.30.0 0.0.0.3 area 2
 area 2 stub no-summary
 ```
@@ -93,21 +100,22 @@ area 2 stub no-summary
 
 2. **Configure Virtual Links**: If necessary, configure virtual links to connect non-backbone areas to the backbone area.
 
-
-Since area 20 is a totally stubby area, it cannot be directly connected to the backbone area (Area 0). We will need to configure a virtual link between R5 and R2 to connect Area 20 to Area 0.
+Since area 2 is a totally stubby area, it cannot be directly connected to the backbone area (Area 0). We will need to configure a virtual link between R5 and R2 to connect Area 20 to Area 0.
 Open up the CLI for R5 and R2 and enter the following commands:
 ```
 R5:
 router ospf 1
-area 2 virtual-link
+area 1 virtual-link 2.2.2.2
+
 R2:
 router ospf 1
-area 1 virtual-link
+area 1 virtual-link 5.5.5.5
 ```
-This will create a virtual link between R5 and R2, allowing Area 20 to be connected to Area 0 through Area 1. Its easy to think of it as a tunnel between R5 and R2, allowing OSPF to exchange routing information between the two areas.
-Without this tunnel R5 would not be able to exchange routing information with R1 and R2, and the HR and IT LANs would not be able to communicate with the rest of the network.
+This will create a virtual link between R5 and R2, allowing area 2 to be connected to Area 0 through Area 1. Its easy to think of it as a tunnel between R5 and R2, allowing OSPF to exchange routing information between the two areas.
 
-3. **Configure HR and IT LANS**: Configure the HR and IT LANs to be part of area 10 and area 20, and ensure that they can communicate with the rest of the network through the appropriate routers. The HR LAN should be a stub area, and the IT LAN should be a totally stubby area.
+3. **Configure HR and IT LANS**: Configure the HR, IT and SALES LANs to be part of area 2,3 and 4, and ensure that they can communicate with the rest of the network through the appropriate routers. The HR LAN should be a NSSA, and the IT LAN should be a Totally Stub Area. SALES LAN should be a NSSA-TS.
+
+
 4. **Configure Route Summarization**: Implement route summarization on the appropriate routers to optimize the OSPF routing tables.
 5. **Verify Configuration**: Use OSPF commands to verify that the stub areas are correctly configured and that the routers are advertising the correct routes.
 

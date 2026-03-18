@@ -3,17 +3,21 @@ Notebook for documentation of the changes made.
 ** R1 - Log - no.1 **
 
 Summary:
-Added backbone-area (0) to R1. 
+Enabled OSPF Area 0 on R1 to establish backbone participation. 
 
 INTERFACE CHANGES
 No changes
 
 OSPF CHANGES
 Router ospf 1
+router-id 1.1.1.1
 network 10.10.10.0 0.0.0.3 area 0
 
+VERIFICATION COMMANDS
+show ip ospf interface e0/0
+
 Purpose:
-Making sure the multi-area ospf configuration will work
+Prepare R1 for multi‑area OSPF by ensuring it forms the required backbone adjacency with R2.
 
 Impact:
 - R1 becomes part of OSPF Area 0.
@@ -23,17 +27,23 @@ Impact:
 ** R2- Log - no.2 **
 
 Summary:
-Added backbone-area (0) to R2. 
+Added R2 to OSPF Area 0 and established adjacency with R1.
 
 INTERFACE CHANGES
 No changes
 
 OSPF CHANGES
 Router ospf 1
+router-id 2.2.2.2
 network 10.10.10.0 0.0.0.3 area 0
 
+VERIFICATION COMMANDS
+show ip osfpf neighbor
+show ip ospf interface e0/0
+show ip route ospf
+
 Purpose:
-Making sure the multi-area ospf configuration will work
+Integrate R2 into the backbone to support future ABR functionality for Area 1.
 
 Impact:
 R2 becomes part of OSPF backbone (Area 0).
@@ -45,7 +55,7 @@ R2 becomes part of OSPF backbone (Area 0).
 ** R2- Log - no.3 **
 
 Summary
-Added area 1 to R2
+Configured R2 for OSPF Area 1 on interfaces e0/1 and e0/2
 
 INTERFACE CHANGES
 No changes
@@ -55,94 +65,154 @@ Router ospf 1
 network 10.20.20.0 0.0.0.3 area 1
 network 10.20.20.4 0.0.0.3 area 1
 
+VERIFICATION COMMANDS
+show ip osfpf neighbor
+show ip ospf interface e0/1
+show ip route ospf
+
 Purpose:
-Ensuring routing between networks
+Enable routing for Area 1 networks and prepare R2 to operate as ABR.
 
 ** R3- Log - no.4 **
 
 Summary
-Added area 1 to R3
+Added R3 to OSPF Area 1
 
 INTERFACE CHANGES
 No changes
 
 OSPF CHANGES
 Router ospf 1
+router-id 3.3.3.3
 network 10.20.20.8 0.0.0.3 area 1
 
+VERIFICATION COMMANDS
+show ip ospf neighbor
+show ip ospf interface brief
+
 Purpose:
-Ensuring routing between networks
+Ensure R3 participates in Area 1 routing and forms adjacency with R2
 
 
 ** R4- Log - no.5 **
 
 Summary
-Added area 1 to R3
+Added R4 to OSPF Area 1
 
 INTERFACE CHANGES
 No changes
 
 OSPF CHANGES
 Router ospf 1
+router-id 4.4.4.4
 network 10.20.20.12 0.0.0.3 area 1
 
+VERIFICATION COMMANDS
+show ip ospf neighbor
+show ip ospf interface brief
+
+
 Purpose:
-Ensuring routing between networks
+Ensure R4 participates in Area 1 routing and forms adjacency with R2
 
 ** R5- Log - no.6 **
 
 Summary
-Added area 1 to R3
+Added R5 to OSPF Area 1 and 2
 
 INTERFACE CHANGES
 No changes
 
 OSPF CHANGES
 Router ospf 1
+router-id 5.5.5.5
 network 10.20.20.8 0.0.0.3 area 1
 network 10.20.20.12 0.0.0.3 area 1
 
+network 10.30.30.0 0.0.0.3 area 2
+
+VERIFICATION COMMANDS
+show ip ospf neighbor
+show ip ospf interface brief 
+show ip ospf database
+
 Purpose:
-Ensuring routing between networks
+Enable R5 to route between Area 1 and Area 2 and prepare for stub‑area connectivity.
 
-TODO
-configure Area 2 to be a totally stubby area
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-R3 – Change Log – 2026‑03‑14
-
-Summary:
-Added HR-LAN on e0/2 as a non-OSPF connected network.
+** R6 - Log - no.7 **
+Summary
+Added R6 to OSPF Area 2 and configured the area as stub (no-summary)
 
 INTERFACE CHANGES
-Interface: Ethernet0/2
-+ ip address 10.50.50.1/24
-+ description HR-LAN (non-OSPF)
-+ no shutdown
+No changes
 
 OSPF CHANGES
-No changes. HR-LAN intentionally excluded from OSPF.
+Router ospf 1
+router-id 6.6.6.6
+network 10.30.30.0 0.0.0.3 area 2
+area 2 stub no-summary
+
+VERIFICATION COMMANDS
+show ip ospf neighbor
+show ip ospf interface brief 
+show ip ospf database
+
 
 Purpose:
-Provide routed access for HR VLAN/subnet while keeping it isolated from OSPF domain.
+Optimize routing in Area 2 by reducing LSDB size and ensuring correct stub‑area behavior.
 
-Impact:
-- HR-LAN reachable only via R3.
-- No Type 5 LSAs generated.
-- No new OSPF adjacencies.
-- R3 remains non-ASBR.
 
-TODO:
-Evaluate if HR-LAN should be redistributed or added to Area 1.
+** R2 - Log - no.8 **
+
+Summary:
+Configured virtual link from R2 to R5 through Area 1.
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+! Add virtual link to R5
+area 1 virtual-link 5.5.5.5 
+
+VERIFICATION COMMANDS
+show ip ospf neighbor
+show ip ospf interface brief 
+show ip ospf database
+
+
+Purpose:
+Restore backbone continuity by extending Area 0 logically via R5.
+
+
+** R5 - Log - no.9 **
+
+Summary:
+Configured virtual link from R5 to R2 through Area 1.
+
+INTERFACE CHANGES
+No changes
+
+OSPF CHANGES
+Router ospf 1
+area 1 virtual-link 2.2.2.2 
+
+VERIFICATION COMMANDS
+show ip ospf virtual-links
+! If down, check virtual link status on R2
+
+Purpose:
+Complete the virtual link tunnel to ensure full OSPF backbone reachability
+
+------
+
+
+TODO: 
+Kontrollera lab och dokumentation så att rätt network är på varje router
+Ändra topo så att area 2 blir nya "IT nät"
+Gör Hr nät till Not-So-Stubby Area
+Lägg till ett nytt area vid r3 (sales) som är ett, NSSA. 
+ändra namnstandard på areas (HR, IT, Sales)
+
+
+Testa connectivity
