@@ -1,6 +1,6 @@
-This is a lab-simulation taken from a real world situation, where I needed to replace a printer to the network. But I did not get the chance to do it in the production network, so I created this lab to test it out in the Devnet Sandbox environment. 
+This is a walkthrough-lab, with some inspiration taken from a real world situation. We were in need of replacing a printer in the network: But I did not get the chance to do it in the production network, so I created this lab to test it out in the Devnet Sandbox environment. This was a great opportunity to test the integration between ISE and Catalyst Center, and to see how MAB works in a real world scenario. 
 # Replace printer in Catalyst Center with MAB
-The printer Printer1 was to be decommissioned and replaced with a new printer, Printer2. The task was to ensure that the new printer would be authenticated via MAB and placed in the correct VLAN (VLAN 30 for printers) in the network, and that this information would be visible in Catalyst Center. The lab was designed to simulate the process of replacing a printer in a network that uses Cisco Identity Services Engine (ISE) for authentication and Cisco Catalyst Center for network management and visibility. Due to the nature of this lab, no pre-configurations is required, all the configurations will be done in the lab itself and some information will be provided in the lab and hardcoded in the walkthrough. 
+The printer that will be added will be named Printer1. The task was to ensure that the new printer would be authenticated via MAB and placed in the correct VLAN (VLAN 30 for printers) in the network, and that this information would be visible in Catalyst Center. The lab is designed to simulate the process of adding a printer to a network that uses Cisco Identity Services Engine (ISE) for authentication and Cisco Catalyst Center for network management and visibility. Since both ISE and Catalyst Center is locaded outside of my regular homelab this lab will be more of a walkthough that a hands-on lab that will test your capabilities. Still, just follow the steps and you will be able to complete the lab and learn how to integrate ISE with Catalyst Center, and how to use MAB to authenticate devices in the network.
 
 ### Want more labs?
 You will find all the labs in the Bitsize series on my Github, link to repo: [CML-bitsize-labs](https://github.com/dannebrob/CML-bitsize-labs/tree/main).
@@ -8,52 +8,93 @@ You will find all the labs in the Bitsize series on my Github, link to repo: [CM
 ## Learning Objectives
 - Identify client devices at the switch level
 - Understand MAC address tables and authentication sessions
+- Familiarize yourself with Catalyst Center and ISE
 - Manage endpoints in Cisco ISE
 - Create and apply ISE authorization policies
 - Assign VLANs via MAB
-- Integrate Catalyst Center with ISE
 - Troubleshoot the end-to-end NAC flow
 
 ## Lab Overview
 
 ## Lab Instructions
-1. **Setup**: Sign in to the Devnet Sandbox startpage and reserve/launch the "Identity Services Engine 3.4" and the "Catalyst Center Sandbox" sandbox. Once the sandboxes is up and running and accessible, access the Catalyst Center GUI and the ISE GUI using the provided credentials. Review the lab topology and familiarize yourself with the network setup, including the location of the printers and switches involved in the lab.
+1. **Setup**: Sign in to the Devnet Sandbox start page and reserve/launch the "Identity Services Engine 3.4" and the "Catalyst Center Sandbox" sandbox. Once the sandboxes is up and running and accessible, access the Catalyst Center GUI and the ISE GUI using the provided credentials. If you are using Windows you need to use AnyConnect client to connect to the VPN to access the sandbox.
 
 2. **Configuration**:
 Follow the instructions in the Lab Tasks to configure ISE and Catalyst Center. Use the CLI to apply the necessary commands and verify your configuration.
-3. **Testing**: After configuring MAB and the necessary policies, test the network connectivity and authentication flow to ensure that the new printer is authenticated correctly and placed in the correct VLAN. Verify that the information is visible in Catalyst Center as expected.
 
 ## Lab Tasks
-1. **Identify the Networks**: Review the network topology and identify the areas that need to be configured [....]
+1. **Identify the Networks**: Familiarize yourself with ISE and Catalyst Center in the devnet sandbox.
 
-2. **Configure ISE**: 
-printer1: mac address: 1111.1111.1111
-printer2: mac address: 2222.2222.2222
-
+2. **Configure ISE**: Create the necessary groups, endpoints, and authorization policies in ISE to allow the printer to authenticate via MAB and be placed in VLAN 30.
 
 3. **Configure Catalyst Center**:
 
 4. **Verify Configuration**: 
 
-5. **Test Connectivity**: 
-
 ## Walkthrough
-This is a walkthrough of the lab, where you can find the commands and steps to complete the lab tasks. It is recommended to attempt the lab on your own before referring to the walkthrough.
+This is a walkthrough of the lab, where you can find the commands and steps to complete the lab tasks.
 
- **Identify the Networks**: Review the network topology and identify the areas that need to be configured [....]
+ ### Identify the Networks
+ Sign up to the Devnet Sandbox and review the lab topology to understand the network setup. Identify the switches, printers, and the ISE server that will be involved in the lab.
 
-**Configure ISE**:
+**Look up the mac address of printer1**: Use the CLI on the switch to find the MAC address of printer1. This will be needed to verify the endpoint in ISE and to ensure that the correct device is being authenticated.
+On the switch: show mac address-table interface, for example: show mac address-table interface Gi1/0/12. The output will be something like this:
+
+```
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+      1111.1111.1111    DYNAMIC     Gi1/0/12
+```
+
+### Configure ISE: 
+Log in to the ISE GUI with your browser and sign in with the provided credentials given in an email sent from your friends at Cisco. 
+
+**Create MAB Group**: 
+First you need to create a group for the printers in ISE, this will help you to apply specific policies for the printers.
+Navigate to Administration → Identity Management → Groups → Add. Create a group named **"Printers"** and save it.
+
+**Create Endpoint**:
+Next, you need to create an endpoint for the printer in ISE. This will allow you to manage the printer's authentication and authorization policies.
+We already have the MAC address of printer1, so we will use that to create the endpoint.
+Navigate to Context Visibility → Endpoints → Add. Create an endpoint with the following details:
+mac address: 1111.1111.1111
+Static Group Assignment: Printers
+Save the endpoint.
+
+**Create Dynamic VLAN Profile**:
+Now you need to create a dynamic VLAN profile that will assign the printer to VLAN 30 when it authenticates via MAB.
+Navigate to Policy → Results → Authorization → Authorization Profiles → Add. Create an authorization profile with the following details:
+Name: Permit_VLAN_30
+Common Tasks → VLAN: → ID/name: 30
+Save the profile.
+
+**Create new Policy Set**:
+Add a new Policy Set for the printer, this will allow you to apply the authorization profile to the printer when it authenticates.
+Navigate to Policy → Policy Sets → Add.
+Name the policy set "Printer Policy Set" and click on the plus icon in the Conditions field to add a new condition.
+
+This will open the Conditions Studio. Drag the Wired_MAB condition from the Libary to the new under the Editor section.
+Now save.
+
+Now you will get back to the Policy Set page, giving you an overview of the newly created Policy Set. Make sure that **Default Network Access** is used in the Allowed Protocols / Server Sequence column. Save that as well.
+A check will be preformed to verify that the policy set is valid. 
+
+Continue in the Policy Set page, click on the arrow to the right of the **Printer Policy** Set (under the Vew column) to open the policy set.
+Under the **Authorization Policy** tab, create a new rule by clicking on the plus icon. Name the rule "Printer MAB Rule" and click on the plus icon in the Conditions field to add a new condition.
+In the Conditions Studio, in the Editor section, click on **"Click to add an attribute"** and click on **Identity Group"** and select **"IdentityGroupe** with attribute **Name**. On it check so it is marked as **Equals** and pick the value **Endpoint Identity Groupe:Printers**. Click on Use. 
+Now you will get back to the Authorization Policy page. 
+Next to the Conditions field click on Select from list in the profile column. Select the **Permit_VLAN_30** profile that we created earlier and click on Use.
+Now save the rule and the policy set.
 
 **Configure Catalyst Center**:
 
-**Verify Configuration**: 
 
-**Test Connectivity**: 
+**Test Connectivity**: In a real world scenario, you would now connect the printer to the network and verify that it authenticates via MAB and is placed in VLAN 30. You can use the Catalyst Center GUI to check the client's status and ensure that it is correctly authenticated and assigned to the right VLAN. Ping the printer from another device in the same VLAN can also be used to verify connectivity.
 
 ## Resources
-- [Cisco OSPF Documentation](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
-- [Cisco OSPF Configuration Guide](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
-- [Cisco OSPF Summarization Documentation](https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13684-12.html)
+- [NiKSec.com; Configuring Cisco ISE MAB Policy Sets](https://niksec.com/configuring-cisco-ise-mab-policy-sets/)
 
 
 🔧 Labb: Identifiera skrivare → Verifiera i ISE → MAB i Catalyst Center
