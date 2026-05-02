@@ -37,8 +37,9 @@ This is a walkthrough of the lab, where you can find the commands and steps to c
  ### Identify the Networks
  Sign up to the Devnet Sandbox and review the lab topology to understand the network setup. Identify the switches, printers, and the ISE server that will be involved in the lab.
 
-**Look up the mac address of printer1**: Use the CLI on the switch to find the MAC address of printer1. This will be needed to verify the endpoint in ISE and to ensure that the correct device is being authenticated.
-On the switch: show mac address-table interface, for example: show mac address-table interface Gi1/0/12. The output will be something like this:
+**Look up the mac address of printer1**: 
+Access the switch that the printer is connected to, you can find the switch in the inventory of Catalyst Center, and use the Run Command feature to find the MAC address of printer1. This will be needed to verify the endpoint in ISE and to ensure that the correct device is being authenticated.
+In the command runner, input the following command: show mac address-table and locate the MAC address of printer1. The output will be something like this:
 
 ```
           Mac Address Table
@@ -88,7 +89,12 @@ Now you will get back to the Authorization Policy page.
 Next to the Conditions field click on Select from list in the profile column. Select the **Permit_VLAN_30** profile that we created earlier and click on Use.
 Now save the rule and the policy set.
 
-**Configure Catalyst Center**:
+### Configure Catalyst Center:
+Kontrollera att Catalyst Center synkar endpointen från ISE
+
+Catalyst Center använder ISE som identitetskälla och måste se skrivaren.
+
+
 
 
 **Test Connectivity**: In a real world scenario, you would now connect the printer to the network and verify that it authenticates via MAB and is placed in VLAN 30. You can use the Catalyst Center GUI to check the client's status and ensure that it is correctly authenticated and assigned to the right VLAN. Ping the printer from another device in the same VLAN can also be used to verify connectivity.
