@@ -11,7 +11,7 @@ You will find all the labs in the Bitsize series on my Github, link to repo: [CM
 Learn more about **Postman** in my CCNP notebook on github: [CCNP Study Notes](https://github.com/dannebrob/CCNP-study-notes)
 
 ## Lab Overview [NOT DONE]
-In this lab I wanted to explore how to use Postman to get some useful information from Cisco CML and use that to work with the data and set it up so I can have a working Netbox config just to import with all the info from my lab.
+In this lab I wanted to explore how to use Postman to get some useful information from Cisco CML and use that to work with the data in Python and set it up so I can have a working Netbox config just to import with all the info from my lab.
 
 ## Lab Instructions [NOT DONE]
 1. **Setup**: Clone the lab repository and navigate to the [`PATH TO LAB FOLDER`] folder. Review the provided startup configurations for the routers in the lab topology.
@@ -32,8 +32,19 @@ Follow the instructions in the Lab Tasks to configure [TOPIC] on the appropriate
 This is a walkthrough of the lab, where you can find the commands and steps to complete the lab tasks. It is recommended to attempt the lab on your own before referring to the walkthrough.
 
 **Use Postman**:
+Postman is such a wonderful tool for testing APIs and a great learning tool that gives you all you need to become self-learned in using REST APIs fluently. It has realy evolev the last couple of years to make it easyer than ever to use.
+
+First, of course, you need to download the latest version of Postman, in this guide I'm using version 11.72.3, and set it up (its easy). You can download it from the App Center in Ubuntu or from there [website](https://www.postman.com/).
+
+Add a collection
+Add variables
+Get token from CML
+Use token to get responses
+
+
 
 **Make the Pyhon script to get the Data**:
+
 
 **Use Python to create the Netbox config**
 
