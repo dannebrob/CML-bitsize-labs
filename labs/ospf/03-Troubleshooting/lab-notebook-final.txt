@@ -1,0 +1,11 @@
+
+
+1. Start	            Ping failed → investigation started
+2. Ping test	        192.168.1.10 → 192.168.3.10 = Unreachable
+3. Check OSPF DB	    Found missing routes (3.3.3.3, 1.1.1.1, 2.2.2.2)
+4. Find root cause	    Network Type mismatch on R2↔R3 link
+5. Fix Network Type	    Changed R3 E0/0 to broadcast
+6. Ping test again	    Still unreachable (correct - second bug exists)
+7. Check config	        Found wrong wildcard: 0.0.255.255 (should be 0.0.0.255)
+8. Fix wildcard mask	Changed R3 OSPF route to 192.168.3.0 0.0.0.255 area 2
+9. Test connectivity    Ping 192.168.1.10 → 192.168.3.10 = 10/10 Success

@@ -1,0 +1,263 @@
+---
+lab:
+  title: OSPF Multi-Area Troubleshooting Lab
+  version: 0.1.0
+  description: >
+    OSPF Multi-Area Lab with 3 IOS-XE routers across Areas 0, 1, 2.
+    Two deliberate OSPF bugs hidden for troubleshooting practice.
+
+  notes: >
+    BUG 1: R2 Ethernet0/1 uses "ip ospf network point-to-multipoint" 
+           but R3 Ethernet0/0 is at default "broadcast" — causes EXSTART/EXCHANGE stuck state.
+    
+    BUG 2: R3 has wrong wildcard "0.0.255.255" instead of "0.0.0.255" 
+           on 192.168.3.0/24 — subnet never enters OSPF.
+
+nodes:
+
+  - id: n0
+    label: R1
+    node_definition: iol-xe
+    x: -300
+    y: 0
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: Ethernet0/0
+        type: physical
+        slot: 0
+      - id: i2
+        label: Ethernet0/1
+        type: physical
+        slot: 1
+    configuration: |
+      hostname R1
+      !
+      no ip domain-lookup
+      !
+      interface Loopback0
+       ip address 1.1.1.1 255.255.255.255
+       ip ospf 1 area 0
+      !
+      interface Ethernet0/0
+       description TO_Ubuntu1
+       ip address 192.168.1.1 255.255.255.0
+       ip ospf 1 area 1
+       no shutdown
+      !
+      interface Ethernet0/1
+       description TO_R2
+       ip address 10.0.12.1 255.255.255.252
+       ip ospf 1 area 0
+       no shutdown
+      !
+      router ospf 1
+       router-id 1.1.1.1
+       passive-interface Ethernet0/0
+       network 1.1.1.1 0.0.0.0 area 0
+       network 192.168.1.0 0.0.0.255 area 1
+       network 10.0.12.0 0.0.0.3 area 0
+      !
+      line con 0
+       logging synchronous
+      !
+      end
+
+  - id: n1
+    label: R2
+    node_definition: iol-xe
+    x: 0
+    y: 0
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: Ethernet0/0
+        type: physical
+        slot: 0
+      - id: i2
+        label: Ethernet0/1
+        type: physical
+        slot: 1
+    configuration: |
+      hostname R2
+      !
+      no ip domain-lookup
+      !
+      interface Loopback0
+       ip address 2.2.2.2 255.255.255.255
+       ip ospf 1 area 0
+      !
+      interface Ethernet0/0
+       description TO_R1
+       ip address 10.0.12.2 255.255.255.252
+       ip ospf 1 area 0
+       no shutdown
+      !
+      interface Ethernet0/1
+       description TO_R3
+       ip address 10.0.23.1 255.255.255.252
+       ip ospf network point-to-multipoint
+       ip ospf 1 area 0
+       no shutdown
+      !
+      router ospf 1
+       router-id 2.2.2.2
+       network 2.2.2.2 0.0.0.0 area 0
+       network 10.0.12.0 0.0.0.3 area 0
+       network 10.0.23.0 0.0.0.3 area 0
+      !
+      line con 0
+       logging synchronous
+      !
+      end
+
+  - id: n2
+    label: R3
+    node_definition: iol-xe
+    x: 300
+    y: 0
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: Ethernet0/0
+        type: physical
+        slot: 0
+      - id: i2
+        label: Ethernet0/1
+        type: physical
+        slot: 1
+    configuration: |
+      hostname R3
+      !
+      no ip domain-lookup
+      !
+      interface Loopback0
+       ip address 3.3.3.3 255.255.255.255
+       ip ospf 1 area 0
+      !
+      interface Ethernet0/0
+       description TO_R2
+       ip address 10.0.23.2 255.255.255.252
+       ip ospf 1 area 0
+       no shutdown
+      !
+      interface Ethernet0/1
+       description TO_Ubuntu3
+       ip address 192.168.3.1 255.255.255.0
+       ip ospf 1 area 2
+       no shutdown
+      !
+      router ospf 1
+       router-id 3.3.3.3
+       passive-interface Ethernet0/1
+       network 3.3.3.3 0.0.0.0 area 0
+       network 10.0.23.0 0.0.0.3 area 0
+       network 192.168.3.0 0.0.255.255 area 2
+      !
+      line con 0
+       logging synchronous
+      !
+      end
+
+  - id: n3
+    label: Ubuntu1
+    node_definition: ubuntu
+    x: -550
+    y: 0
+    interfaces:
+      - id: i0
+        label: ens2
+        type: physical
+        slot: 0
+    configuration: |
+      #cloud-config
+      hostname: ubuntu1
+      manage_etc_hosts: true
+      system_info:
+        default_user:
+          name: cisco
+          plain_text_passwd: cisco
+          lock_passwd: false
+      write_files:
+        - path: /etc/netplan/50-cloud-init.yaml
+          content: |
+            network:
+              version: 2
+              ethernets:
+                ens2:
+                  addresses:
+                    - 192.168.1.10/24
+                  routes:
+                    - to: default
+                      via: 192.168.1.1
+                  nameservers:
+                    addresses: [8.8.8.8]
+      runcmd:
+        - netplan apply
+
+  - id: n4
+    label: Ubuntu3
+    node_definition: ubuntu
+    x: 550
+    y: 0
+    interfaces:
+      - id: i0
+        label: ens2
+        type: physical
+        slot: 0
+    configuration: |
+      #cloud-config
+      hostname: ubuntu3
+      manage_etc_hosts: true
+      system_info:
+        default_user:
+          name: cisco
+          plain_text_passwd: cisco
+          lock_passwd: false
+      write_files:
+        - path: /etc/netplan/50-cloud-init.yaml
+          content: |
+            network:
+              version: 2
+              ethernets:
+                ens2:
+                  addresses:
+                    - 192.168.3.10/24
+                  routes:
+                    - to: default
+                      via: 192.168.3.1
+                  nameservers:
+                    addresses: [8.8.8.8]
+      runcmd:
+        - netplan apply
+
+links:
+  - id: l0
+    n1: n3
+    i1: i0
+    n2: n0
+    i2: i1
+
+  - id: l1
+    n1: n0
+    i1: i2
+    n2: n1
+    i2: i1
+
+  - id: l2
+    n1: n1
+    i1: i2
+    n2: n2
+    i2: i1
+
+  - id: l3
+    n1: n2
+    i1: i2
+    n2: n4
+    i2: i0
