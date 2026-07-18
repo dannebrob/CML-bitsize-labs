@@ -105,6 +105,7 @@ Follow the instructions in the Lab Tasks to troubleshoot the OSPF on all the app
 
 10. **Final Verification - End-to-End Connectivity**:
     - From Ubuntu1, ping Ubuntu3:
+  ```
   ubuntu1$ ping -c 4 192.168.3.10
   PING 192.168.3.10 (192.168.3.10) 56(84) bytes of data.
   64 bytes from 192.168.3.10: icmp_seq=1 ttl=62 time=4.2 ms
@@ -116,6 +117,7 @@ Follow the instructions in the Lab Tasks to troubleshoot the OSPF on all the app
     - From Ubuntu3, ping Ubuntu1:
   ubuntu3$ ping -c 4 192.168.1.10
   (Should also succeed with 0% packet loss)
+  ```
 
 11. **Document the Solution**:
     - **Bug #1**: R2 Ethernet0/1 configured with `ip ospf network point-to-multipoint` while R3 Ethernet0/0 used default `broadcast` type. This prevented OSPF adjacency formation.
